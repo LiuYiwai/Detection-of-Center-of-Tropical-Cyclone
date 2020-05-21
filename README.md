@@ -6,7 +6,7 @@ A simple implementation of Objective Detection of Center of Tropical Cyclone in 
 process:
 ```python
 python process_data.py --input_dir [input_dir] --output_dir [output_dir] --batch [batch] \
-                    --img_size [img_size] --var_kernel[var_kernel] --gradient_kernel [gradient_kernel] \
+                    --img_size [img_size] --var_kernel [var_kernel] --gradient_kernel [gradient_kernel] \
                     --smooth_kernel [smooth_kernel]
 ```
 

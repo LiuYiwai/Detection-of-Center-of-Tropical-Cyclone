@@ -8,7 +8,7 @@ import numpy as np
 from scipy import signal
 from tqdm import tqdm
 
-from utils import encode, read
+from utils import encode
 
 
 def get_H():
@@ -185,15 +185,26 @@ def split_list(filename_list, batch=32):
     return filename_split
 
 
-def save(filenames, output_dir, result_variance):
+def save_var_encode(filenames, output_dir, result_variance):
     # TODO save some other things like speed in filename
     for filename, result in zip(filenames, result_variance):
         img_name = filename.split('.')[0]
-        save_path = os.path.join(output_dir, img_name)
+        save_path = os.path.join(output_dir, img_name + '.json')
 
         variance_encode = list(map(encode, result))
         with open(save_path, 'w') as f:
             json.dump(variance_encode, f)
+
+
+def save_max_point(filenames, output_dir, max_position, img_size):
+    max_x, max_y = divmod(max_position, img_size)
+    for filename, (x, y) in zip(filenames, zip(max_x, max_y)):
+        img_name = filename.split('.')[0]
+        save_path = os.path.join(output_dir, img_name + '.txt')
+
+        with open(save_path, 'w') as f:
+            f.write('x:' + str(x) + '\n')
+            f.write('y:' + str(y) + '\n')
 
 
 def main(args):
@@ -224,26 +235,14 @@ def main(args):
         H = signal.convolve(smooth_density, H, mode="same")
         max_position = np.array([np.argmax(i) for i in H])
 
+        save_max_point(filenames, output_dir, max_position, img_size)
+
         included_angle = get_included_angle(max_position, angle, img_size)
 
         result_variance = get_variance(included_angle, img_size=img_size, var_kernel=var_kernel)
 
-        save(filenames, output_dir, result_variance)
+        save_var_encode(filenames, output_dir, result_variance)
 
-
-def test():
-    dir_path = r"./out"
-    filenames = os.listdir(dir_path)
-    mat, speed = read(dir_path, filenames)
-
-    # print(mat)
-    print(speed)
-    print(mat.shape)
-    print(speed.shape)
-
-
-# test()
-# input()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
